@@ -15,22 +15,22 @@ public class Application {
             System.out.print("숫자를 입력해주세요 : ");
             String userInput = scanner.nextLine();
 
-            validateInput(userInput); // 입력 검증
+            validateInput(userInput);
 
-            System.out.println("입력한 숫자: " + userInput);
+            List<Integer> userNumbers = convertInputToNumbers(userInput);
+            checkResult(computerNumbers, userNumbers);
 
         } catch (IllegalArgumentException e) {
             System.out.println("[ERROR] " + e.getMessage());
         }
     }
 
-    // 랜덤으로 1~9 사이 서로 다른 숫자 3개 생성
     public static List<Integer> generateRandomNumbers() {
         List<Integer> numbers = new ArrayList<>();
         Random random = new Random();
 
         while (numbers.size() < 3) {
-            int randomNumber = random.nextInt(9) + 1; // 1~9
+            int randomNumber = random.nextInt(9) + 1;
             if (!numbers.contains(randomNumber)) {
                 numbers.add(randomNumber);
             }
@@ -38,26 +38,59 @@ public class Application {
         return numbers;
     }
 
-    // 입력 검증
     public static void validateInput(String input) {
         List<String> errors = new ArrayList<>();
 
-        if (!input.matches("[1-9]+")) {
+        // 입력값에서 공백 제거
+        String sanitizedInput = input.replace(" ", "");
+
+        if (!sanitizedInput.matches("[1-9]+")) {
             errors.add("1~9까지 숫자만 입력할 수 있습니다.");
         }
 
-        if (input.length() != 3) {
+        if (sanitizedInput.length() != 3) {
             errors.add("3자리 숫자를 입력해야 합니다.");
         }
 
-        if (input.charAt(0) == input.charAt(1) ||
-                input.charAt(0) == input.charAt(2) ||
-                input.charAt(1) == input.charAt(2)) {
+        if (sanitizedInput.length() == 3 && (sanitizedInput.charAt(0) == sanitizedInput.charAt(1) ||
+                sanitizedInput.charAt(0) == sanitizedInput.charAt(2) ||
+                sanitizedInput.charAt(1) == sanitizedInput.charAt(2))) {
             errors.add("서로 다른 숫자를 입력해야 합니다.");
         }
 
         if (!errors.isEmpty()) {
             throw new IllegalArgumentException(String.join(" / ", errors));
+        }
+    }
+
+
+    public static List<Integer> convertInputToNumbers(String input) {
+        List<Integer> numbers = new ArrayList<>();
+        for (char c : input.toCharArray()) {
+            numbers.add(Character.getNumericValue(c));
+        }
+        return numbers;
+    }
+
+    public static void checkResult(List<Integer> computer, List<Integer> user) {
+        int strikes = 0;
+        int balls = 0;
+
+        for (int i = 0; i < 3; i++) {
+            if (user.get(i).equals(computer.get(i))) {
+                strikes++;
+            } else if (computer.contains(user.get(i))) {
+                balls++;
+            }
+        }
+
+        if (strikes == 3) {
+            System.out.println("3스트라이크");
+            System.out.println("3개의 숫자를 모두 맞히셨습니다!");
+        } else if (strikes > 0 || balls > 0) {
+            System.out.println(balls + "볼 " + strikes + "스트라이크");
+        } else {
+            System.out.println("미스");
         }
     }
 }
