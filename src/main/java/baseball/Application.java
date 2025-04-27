@@ -4,42 +4,28 @@ import java.util.*;
 
 public class Application {
     public static void main(String[] args) {
-        System.out.println("숫자 야구 게임을 시작합니다.");
+        startGame();
+    }
 
+    public static void startGame() {
+        System.out.println("숫자 야구 게임을 시작합니다.");
         Scanner scanner = new Scanner(System.in);
 
-        while (true) {
-            List<Integer> computerNumbers = generateRandomNumbers();
-            // System.out.println("컴퓨터 숫자: " + computerNumbers); // 테스트용
+        List<Integer> computerNumbers = generateRandomNumbers();
+        boolean isGameOver = false;
 
-            boolean isGameEnd = false;
-            while (!isGameEnd) {
-                try {
-                    System.out.print("숫자를 입력해주세요 : ");
-                    String userInput = scanner.nextLine().trim();
-
-                    validateInput(userInput);
-
-                    List<Integer> userNumbers = convertInputToNumbers(userInput);
-                    isGameEnd = checkResult(computerNumbers, userNumbers);
-
-                } catch (IllegalArgumentException e) {
-                    System.out.println("[ERROR] " + e.getMessage());
+        while (!isGameOver) {
+            try {
+                List<Integer> userNumbers = getUserNumbers(scanner);
+                boolean isCorrect = checkResult(computerNumbers, userNumbers);
+                if (isCorrect) {
+                    isGameOver = !askRestart(scanner);
+                    if (!isGameOver) {
+                        computerNumbers = generateRandomNumbers(); // 새 게임 준비
+                    }
                 }
-            }
-
-            System.out.println("게임을 새로 시작하려면 1, 종료하려면 2를 입력하세요.");
-            String restartInput = scanner.nextLine().trim();
-
-            if (restartInput.equals("1")) {
-                // 새 게임 시작
-                continue;
-            } else if (restartInput.equals("2")) {
-                // 게임 종료
-                break;
-            } else {
-                System.out.println("[ERROR] 잘못된 입력입니다. 프로그램을 종료합니다.");
-                break;
+            } catch (IllegalArgumentException e) {
+                System.out.println("[ERROR] " + e.getMessage());
             }
         }
     }
@@ -47,7 +33,6 @@ public class Application {
     public static List<Integer> generateRandomNumbers() {
         List<Integer> numbers = new ArrayList<>();
         Random random = new Random();
-
         while (numbers.size() < 3) {
             int randomNumber = random.nextInt(9) + 1;
             if (!numbers.contains(randomNumber)) {
@@ -57,21 +42,27 @@ public class Application {
         return numbers;
     }
 
+    public static List<Integer> getUserNumbers(Scanner scanner) {
+        System.out.print("숫자를 입력해주세요 : ");
+        String input = scanner.nextLine().replace(" ", "");
+        validateInput(input);
+        return convertInputToNumbers(input);
+    }
+
     public static void validateInput(String input) {
         List<String> errors = new ArrayList<>();
-        String sanitizedInput = input.replace(" ", "");
 
-        if (!sanitizedInput.matches("[1-9]+")) {
+        if (!input.matches("[1-9]+")) {
             errors.add("1~9까지 숫자만 입력할 수 있습니다.");
         }
 
-        if (sanitizedInput.length() != 3) {
+        if (input.length() != 3) {
             errors.add("3자리 숫자를 입력해야 합니다.");
         }
 
-        if (sanitizedInput.length() == 3 && (sanitizedInput.charAt(0) == sanitizedInput.charAt(1) ||
-                sanitizedInput.charAt(0) == sanitizedInput.charAt(2) ||
-                sanitizedInput.charAt(1) == sanitizedInput.charAt(2))) {
+        if (input.length() == 3 && (input.charAt(0) == input.charAt(1) ||
+                input.charAt(0) == input.charAt(2) ||
+                input.charAt(1) == input.charAt(2))) {
             errors.add("서로 다른 숫자를 입력해야 합니다.");
         }
 
@@ -83,9 +74,7 @@ public class Application {
     public static List<Integer> convertInputToNumbers(String input) {
         List<Integer> numbers = new ArrayList<>();
         for (char c : input.toCharArray()) {
-            if (c != ' ') {
-                numbers.add(Character.getNumericValue(c));
-            }
+            numbers.add(Character.getNumericValue(c));
         }
         return numbers;
     }
@@ -105,12 +94,26 @@ public class Application {
         if (strikes == 3) {
             System.out.println("3스트라이크");
             System.out.println("3개의 숫자를 모두 맞히셨습니다!");
-            return true; // 게임 종료
-        } else if (strikes > 0 || balls > 0) {
+            return true;
+        }
+
+        if (strikes > 0 || balls > 0) {
             System.out.println(balls + "볼 " + strikes + "스트라이크");
         } else {
             System.out.println("미스");
         }
-        return false; // 게임 계속 진행
+        return false;
+    }
+
+    public static boolean askRestart(Scanner scanner) {
+        System.out.println("게임을 새로 시작하려면 1, 종료하려면 2를 입력하세요.");
+        String input = scanner.nextLine().trim();
+        if (input.equals("1")) {
+            return true;
+        } else if (input.equals("2")) {
+            return false;
+        } else {
+            throw new IllegalArgumentException("1 또는 2만 입력 가능합니다.");
+        }
     }
 }
