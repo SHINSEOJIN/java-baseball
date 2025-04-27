@@ -40,18 +40,24 @@ public class Application {
 
     // 입력 검증
     public static void validateInput(String input) {
+        List<String> errors = new ArrayList<>();
+
         if (!input.matches("[1-9]+")) {
-            throw new IllegalArgumentException("1~9까지 숫자만 입력할 수 있습니다.");
+            errors.add("1~9까지 숫자만 입력할 수 있습니다.");
         }
 
         if (input.length() != 3) {
-            throw new IllegalArgumentException("3자리 숫자를 입력해야 합니다.");
+            errors.add("3자리 숫자를 입력해야 합니다.");
         }
 
         if (input.charAt(0) == input.charAt(1) ||
                 input.charAt(0) == input.charAt(2) ||
                 input.charAt(1) == input.charAt(2)) {
-            throw new IllegalArgumentException("서로 다른 숫자를 입력해야 합니다.");
+            errors.add("서로 다른 숫자를 입력해야 합니다.");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new IllegalArgumentException(String.join(" / ", errors));
         }
     }
 }
