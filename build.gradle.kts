@@ -15,6 +15,11 @@ dependencies {
     testImplementation("io.kotest", "kotest-runner-junit5", "5.8.0")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 tasks.test {
     useJUnitPlatform()
 }
